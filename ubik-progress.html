@@ -1,0 +1,125 @@
+<link rel="import" href="../polymer/polymer.html">
+<!--
+Ubik Progress Widget.
+
+##### Example
+
+<ubik-progress 
+    caption="Acceleration" 
+    value="100" 
+    thresold="70"
+    semicircle>
+</ubik-progress>
+
+@element ubik-progress
+@blurb Circle Progress Bar 
+@status alpha
+@homepage http://ubikee.github.io/ubik-gauge
+-->
+<link rel="import" href="../core-icon/core-icon.html">
+<link rel="import" href="../core-icons/core-icons.html">
+<polymer-element name="ubik-progress" attributes="caption value threshold content semicircle strokeWidth normalColor alertColor">
+    <template>
+        <link rel="stylesheet" href="ubik-gauge.css">
+        <div flex vertical layout center-justified>
+            <svg id="chart" viewBox="0 0 100 {{height}}" preserveAspectRatio="xMidYMid meet">
+                <foreignObject x="10" y="40" width="80" height="20" style="align:center">
+                    <content></content>
+                </foreignObject>
+            </svg>
+            <label self-center>{{caption}}</label>
+        </div>
+    </template>
+<script>
+Polymer({
+
+/**
+* The `caption` attribute sets a caption text behind the progress bar
+*
+* @attribute caption
+* @type string
+* @default empty
+*/
+caption: '',
+
+/**
+* The `value` attribute sets principal progress bar value
+*
+* @attribute value
+* @type int
+* @default 0
+*/
+value: 0,
+
+/**
+* The `threshold` attribute sets the secondary progress bar value
+*
+* @attribute threshold
+* @type int
+* @default 0
+*/
+threshold: 0,
+
+/**
+* The `strokeWidth` attribute sets the progressbar thickness
+*
+* @attribute strokeWidth
+* @type int
+* @default 5
+*/
+strokeWidth : 5,
+
+/**
+* The `semicircle` attribute toggles the progressbar shape to a semicircle
+*
+* @attribute semicircle
+* @type boolean
+* @default false
+*/
+semicircle  : false,
+
+normalColor : '#2F4A5E',
+alertColor  : '#F00',
+height      : 100,
+texty       : 58,
+
+ready : function () {
+    var radius = 50-(this.strokeWidth/2);
+    var color = this.value > this.threshold ? this.normalColor : this.alertColor;
+    this.arcx(100,            this.strokeWidth, radius, '#DEE2E7');
+    this.arcx(this.threshold, this.strokeWidth, radius, '#F99');
+    this.arcx(this.value,     this.strokeWidth, radius,  color);
+},
+
+semicircleChanged : function () {
+    this.height = 50;
+    this.texty = 49;
+},
+
+arcx : function( percentage, width, rad1, color) {
+    var svgns = "http://www.w3.org/2000/svg";
+    var path = document.createElementNS(svgns, "path");
+    var unit = (Math.PI *2) / 100;
+    var angle = (percentage * unit - 0.001);
+    var large_arc_flag = percentage > 50 ? 1 : 0; 
+    if (this.semicircle) {
+        angle = angle / 2;
+        large_arc_flag = 0;
+    }
+
+    var x1 = 50 - rad1;
+    var x2 = 50 - rad1 * Math.cos(angle);
+    var y2 = 50 - rad1 * Math.sin(angle);
+    var d = " M " + x1 + ", 50 " +
+    " A " + rad1 + "," + rad1 + " 0 " + large_arc_flag + " 1 " + x2 + "," + y2;
+
+    path.setAttribute("d", d);
+    path.setAttribute("fill", 'none');
+    path.setAttribute("stroke", color);
+    path.setAttribute("stroke-width", this.strokeWidth);
+    path.setAttribute("stroke-linecap", "round");
+    this.$.chart.appendChild(path);
+}
+})
+</script>
+</polymer-element>
